@@ -30,7 +30,7 @@ mongoose
   });
 
 //Starting server
-const port = process.env.PORT;
+const port = process.env.PORT; //Heroku needs this PORT env variable
 
 const server = app.listen(port, () => {
   console.log(`App running in port ${port}`);
