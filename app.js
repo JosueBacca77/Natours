@@ -1,25 +1,25 @@
-const express = require('express');
-const morgan = require('morgan');
-const toursRouter = require('./routs/tourRutes');
-const AppError = require('./utils/appError');
-const { errors } = require('celebrate');
-const usersRouter = require('./routs/userRoutes');
-const errorHandler = require('./controllers/errorController');
-const rateLimit = require('express-rate-limit');
-const multer = require('multer');
-const helmet = require('helmet');
+const express = require("express");
+const morgan = require("morgan");
+const toursRouter = require("./routs/tourRutes");
+const AppError = require("./utils/appError");
+const { errors } = require("celebrate");
+const usersRouter = require("./routs/userRoutes");
+const errorHandler = require("./controllers/errorController");
+const rateLimit = require("express-rate-limit");
+const multer = require("multer");
+const helmet = require("helmet");
 const app = express();
-const mongoSanitize = require('express-mongo-sanitize');
-const xss = require('xss-clean');
-const hpp = require('hpp');
-const { whiteListParameters } = require('./configs');
-const { reviewRoutes } = require('./routs/reviewRoutes');
-const path = require('path');
-const viewRouter = require('./routs/viewRoutes');
-const cookieParser = require('cookie-parser');
-const cors = require('cors');
-const { bookingRoutes } = require('./routs/bookingRoutes');
-const compression = require('compression');
+const mongoSanitize = require("express-mongo-sanitize");
+const xss = require("xss-clean");
+const hpp = require("hpp");
+const { whiteListParameters } = require("./configs");
+const { reviewRoutes } = require("./routs/reviewRoutes");
+const path = require("path");
+const viewRouter = require("./routs/viewRoutes");
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
+const { bookingRoutes } = require("./routs/bookingRoutes");
+const compression = require("compression");
 
 // app.get('/api/v1/tours', getAllTours)
 // app.get('/api/v1/tours/:id', getTour)
@@ -30,37 +30,37 @@ const compression = require('compression');
 // Configuración de CORS para permitir todas las solicitudes de origen
 app.use(cors());
 //PUG is a whitespace sensitive  syntax for writing html
-app.set('view engine', 'pug');
+app.set("view engine", "pug");
 //Pug templates are called views in express
 //using we dont have to care about slashes or not
 //we dont always know about the slashes in path we receives
-app.set('views', path.join(__dirname, 'views'));
+app.set("views", path.join(__dirname, "views"));
 
 //Serving static files
 //we are telling that the static files are in the public folder
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
 //security HTTP headers
 // app.use(helmet());
 app.use(helmet({ contentSecurityPolicy: false }));
 
 //development logging
-if (process.env.NODE_ENV === 'development') {
-      app.use(morgan('dev'));
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
 }
 
 //limit request for same API
 const limiter = rateLimit({
-      windowMs: 1 * 60 * 1000, // 1 minutes
-      max: 30, // 2 requests per window
-      message: 'Too many requests, please try again later.',
+  windowMs: 1 * 60 * 1000, // 1 minutes
+  max: 30, // 2 requests per window
+  message: "Too many requests, please try again later.",
 });
-app.use('/api', limiter);
+app.use("/api", limiter);
 
 app.use(compression());
 
 //Body parser, reading data from body into req.body
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({ limit: "10kb" }));
 
 //Esto lo agerego el porque no accedia al body en el save setting
 //que es con urlencoded
@@ -80,9 +80,9 @@ app.use(xss());
 //Prevent parameter pollution
 //(will use only the last one)
 app.use(
-      hpp({
-            whitelist: whiteListParameters,
-      }),
+  hpp({
+    whitelist: whiteListParameters,
+  })
 );
 
 //Data sanitization against XSS
@@ -92,21 +92,27 @@ app.use(express.urlencoded({ extended: true }));
 const storage = multer.memoryStorage(); // You can also specify a disk storage location
 const upload = multer({ storage: storage });
 
+app.set("trust proxy", 1);
+app.get("/ip", (request, response) => response.send(request.ip));
+app.get("/x-forwarded-for", (request, response) =>
+  response.send(request.headers["x-forwarded-for"])
+);
+
 //multer middleware
-app.patch('/update', upload.none());
+app.patch("/update", upload.none());
 
 //Using own routers
-app.use('/', viewRouter);
-app.use('/api/v1/tours', toursRouter);
+app.use("/", viewRouter);
+app.use("/api/v1/tours", toursRouter);
 
-app.use('/api/v1/users', usersRouter);
-app.use('/api/v1/reviews', reviewRoutes);
-app.use('/api/v1/bookings', bookingRoutes);
+app.use("/api/v1/users", usersRouter);
+app.use("/api/v1/reviews", reviewRoutes);
+app.use("/api/v1/bookings", bookingRoutes);
 
 //if the code get into this section, is because none of toursRouter or usersRouter
 //could catch it, so the route doesnt exists
-app.all('*', (req, res, next) => {
-      next(new AppError(`The route ${req.url} doesn't exist`, 404));
+app.all("*", (req, res, next) => {
+  next(new AppError(`The route ${req.url} doesn't exist`, 404));
 });
 
 // Handle validation errors

@@ -13,12 +13,6 @@ process.on("uncaughtException", (error) => {
 dotenv.config({ path: `${__dirname}/config.env` });
 const app = require("./app");
 
-app.set("trust proxy", 1);
-app.get("/ip", (request, response) => response.send(request.ip));
-app.get("/x-forwarded-for", (request, response) =>
-  response.send(request.headers["x-forwarded-for"])
-);
-
 const DB = process.env.DATABASE.replace(
   "<PASSWORD>",
   process.env.DATABASE_PASSWORD
