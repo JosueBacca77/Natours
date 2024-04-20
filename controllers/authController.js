@@ -12,7 +12,7 @@ const signToken = (id) => {
   });
 };
 
-const createSendToken = (user, statusCode, res) => {
+const createSendToken = (user, statusCode, req, res) => {
   const token = signToken(user._id);
 
   const cookieOptions = {
@@ -20,6 +20,7 @@ const createSendToken = (user, statusCode, res) => {
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
+    secure: req.secure,
     // secure: true // This is essential for HTTPS
   };
 
@@ -30,8 +31,6 @@ const createSendToken = (user, statusCode, res) => {
 
   //We could use the express secure property like below,
   console.log("req.secure", req.secure);
-  if (req.secure && process.env.NODE_ENV === "production")
-    cookieOptions.secure = true;
 
   res.cookie("jwt", token, cookieOptions);
 
@@ -74,7 +73,7 @@ const signup = createAsync(async (req, res) => {
   await new Email(newUser, url).sendWelcome();
 
   //expiresIn could be a integer (miliseconds) or in this format 90d 10h 5m 3s
-  createSendToken(newUser, 201, res);
+  createSendToken(newUser, 201, req, res);
 });
 
 const login = createAsync(async (req, res, next) => {
@@ -94,7 +93,7 @@ const login = createAsync(async (req, res, next) => {
     return next(new AppError("Incorrect email or password", 401));
 
   // 3) If everything ok, generate and send token to client
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, req, res);
 });
 
 //When we use token based authentication we dont need an endpoint like this
@@ -291,7 +290,7 @@ const resetPassword = createAsync(async (req, res, next) => {
   await user.save();
 
   // 4) Log the user in, send JWT
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, req, res);
 });
 
 const updatePassword = createAsync(async (req, res, next) => {
@@ -325,7 +324,7 @@ const updatePassword = createAsync(async (req, res, next) => {
   //2- If we do this, the document middleware will not run ( .pre('save') )
 
   // 4) Log user in, send JWT
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, req, res);
 });
 
 const updateUserData = createAsync(async (req, res, next) => {
