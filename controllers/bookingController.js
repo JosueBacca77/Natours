@@ -55,11 +55,23 @@ const getCheckoutSession = createAsync(async (req, res, next) => {
 });
 
 const createBookingCheckout = createAsync(async (req, res, next) => {
-  //This is only temporary, because it's unsecure
+  const sig = request.headers["stripe-signature"];
+
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
+  } catch (err) {
+    response.status(400).send(`Webhook Error: ${err.message}`);
+    return;
+  }
+
   const query = req.query;
   const body = req.body;
   const headers = req.headers;
 
+  console.log("sig", sig);
+  console.log("event", event);
   console.log("query", query);
   console.log("body", body);
   console.log("headers", headers);
