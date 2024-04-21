@@ -31,6 +31,7 @@ const createSendToken = (user, statusCode, req, res) => {
 
   //We could use the express secure property like below,
   console.log("req.secure", req.secure);
+  console.log("req.headers", req.headers);
 
   res.cookie("jwt", token, cookieOptions);
 
