@@ -6,10 +6,13 @@ const {
   updateUserData,
   getMyTours,
   getOverview,
+  alerts,
 } = require("../controllers//viewController");
 const { protect, isLoggedIn } = require("../controllers/authController");
 
 const viewRouter = express.Router();
+
+viewRouter.use(alerts);
 
 viewRouter.get("/", isLoggedIn, getOverview);
 
