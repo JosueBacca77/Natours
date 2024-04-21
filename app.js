@@ -28,7 +28,14 @@ const compression = require("compression");
 // app.delete('/api/v1/tours/:id', deleteTour)
 
 // Configuración de CORS para permitir todas las solicitudes de origen
-app.use(cors());
+// app.use(cors());
+//what this middleware does is set:
+//Access-Control-Allow-Origin: *
+// * means that any domain can access it
+
+//Example:
+app.use(cors({ origin: "https://natours-zey4.onrender.com" }));
+
 //PUG is a whitespace sensitive  syntax for writing html
 app.set("view engine", "pug");
 //Pug templates are called views in express

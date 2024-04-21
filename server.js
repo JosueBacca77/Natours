@@ -48,7 +48,7 @@ process.on("unhandledRejection", (error) => {
 });
 
 //Heroku will send this signal every 24 hours to keep our app safety
-proccess.on("SIGNTERM", () => {
+process.on("SIGNTERM", () => {
   console.log("SIGTERM RECEIVED. Shutting down gracefully");
   server.close(() => {
     console.log("Process terminated!");
