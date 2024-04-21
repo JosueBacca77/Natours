@@ -8,13 +8,13 @@ const {
   deleteBooking,
   getAllBookings,
   createBooking,
-  createBookingCheckout,
+  webhookBookingCheckout,
 } = require("../controllers/bookingController");
 require("../controllers/reviewController");
 
 const bookingRoutes = express.Router();
 
-bookingRoutes.post("/create-booking-checkout", createBookingCheckout);
+bookingRoutes.post("/create-booking-checkout", webhookBookingCheckout);
 
 bookingRoutes.use(protect);
 

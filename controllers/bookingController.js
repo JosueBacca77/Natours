@@ -3,6 +3,7 @@ const Tour = require("../models/tourModel");
 const createAsync = require("../utils/catchAsync");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const handlerFactory = require("../common/handlerFactory");
+const User = require("../models/userModel");
 
 const getCheckoutSession = createAsync(async (req, res, next) => {
   const tourId = req?.params?.tourId;
@@ -54,16 +55,23 @@ const getCheckoutSession = createAsync(async (req, res, next) => {
   });
 });
 
-const createBookingCheckout = createAsync(async (req, res, next) => {
-  const sig = req.headers["stripe-signature"];
+const createBookingCheckout = createAsync(async (session) => {
+  console.log("session to create", session);
+  const tour = session.client_reference_id;
+  const user = (await User.findOne({ email: session.customer_email })).id;
+  const price = session.line_items[0].unit_amount / 100;
+  await Booking.create({ tour, user, price });
+});
+
+const webhookBookingCheckout = createAsync(async (req, res, next) => {
+  const stripeSignatrue = req.headers["stripe-signature"];
 
   let event;
 
-  console.log("sig", sig);
   try {
     event = stripe.webhooks.constructEvent(
       req.body,
-      sig,
+      stripeSignatrue,
       process.env.WEBHOOK_CHECKOUT_BOOKING_SECRET
     );
   } catch (err) {
@@ -71,22 +79,16 @@ const createBookingCheckout = createAsync(async (req, res, next) => {
     return;
   }
 
-  const query = req.query;
-  const body = req.body;
-  const headers = req.headers;
+  if (event.type !== "checkout.session.completed") {
+    response
+      .status(400)
+      .send(
+        `Webhook Error: event for this endpoint should be checkout.session.completed`
+      );
+  }
+  await createBookingCheckout(event.data.object);
 
-  console.log("event", event);
-  console.log("query", query);
-  console.log("body", body);
-  console.log("headers", headers);
-
-  // if (!tour || !user || !price) return next();
-
-  // await Booking.create({ tour, user, price });
-
-  // res.redirect(req.originalUrl.split('?')[0]);
-
-  next();
+  res.status(200).json({ received: true });
 });
 
 const createBooking = handlerFactory.createDocument(Booking);
@@ -103,7 +105,7 @@ const deleteBooking = handlerFactory.deleteDocument(Booking);
 
 module.exports = {
   getCheckoutSession,
-  createBookingCheckout,
+  webhookBookingCheckout,
   createBooking,
   getAllBookings,
   getBooking,
