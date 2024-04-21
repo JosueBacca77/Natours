@@ -96,9 +96,6 @@ const upload = multer({ storage: storage });
 app.enable("trust proxy");
 
 // app.get("/ip", (request, response) => response.send(request.ip));
-// app.get("/x-forwarded-for", (request, response) =>
-//   response.send(request.headers["x-forwarded-for"])
-// );
 
 //multer middleware
 app.patch("/update", upload.none());
