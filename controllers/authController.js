@@ -20,6 +20,8 @@ const createSendToken = (user, statusCode, req, res) => {
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
+    //req.secure ins an express variable
+    //we can access to this because of app.set("trust proxy", 1);
     secure: req.secure,
     // secure: true // This is essential for HTTPS
   };
@@ -28,10 +30,6 @@ const createSendToken = (user, statusCode, req, res) => {
 
   //We cant do this because not all deployed applications are automatically set to https
   // if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
-
-  //We could use the express secure property like below,
-  console.log("req.secure", req.secure);
-  console.log("req.headers", req.headers);
 
   res.cookie("jwt", token, cookieOptions);
 
