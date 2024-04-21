@@ -36,6 +36,12 @@ app.use(cors());
 //Example:
 // app.use(cors({ origin: "https://natours-zey4.onrender.com" }));
 
+// for non-simple requests
+//OPTIONS requests are used to check if a server accepts a request, for
+//example when we use post or delete requests
+app.options("*", cors());
+// app.options("/api/v1/tours/:id", cors()); example
+
 //PUG is a whitespace sensitive  syntax for writing html
 app.set("view engine", "pug");
 //Pug templates are called views in express
