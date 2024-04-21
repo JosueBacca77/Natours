@@ -92,7 +92,7 @@ app.use(express.urlencoded({ extended: true }));
 const storage = multer.memoryStorage(); // You can also specify a disk storage location
 const upload = multer({ storage: storage });
 
-app.set("trust proxy", 1);
+app.set("trust proxy", 2);
 app.get("/ip", (request, response) => response.send(request.ip));
 app.get("/x-forwarded-for", (request, response) =>
   response.send(request.headers["x-forwarded-for"])
