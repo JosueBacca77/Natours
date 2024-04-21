@@ -59,8 +59,13 @@ const createBookingCheckout = createAsync(async (req, res, next) => {
 
   let event;
 
+  console.log("sig", sig);
   try {
-    event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      process.env.WEBHOOK_CHECKOUT_BOOKING_SECRET
+    );
   } catch (err) {
     response.status(400).send(`Webhook Error: ${err.message}`);
     return;
@@ -70,7 +75,6 @@ const createBookingCheckout = createAsync(async (req, res, next) => {
   const body = req.body;
   const headers = req.headers;
 
-  console.log("sig", sig);
   console.log("event", event);
   console.log("query", query);
   console.log("body", body);
