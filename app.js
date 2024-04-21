@@ -20,6 +20,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const { bookingRoutes } = require("./routs/bookingRoutes");
 const compression = require("compression");
+const { webhooksRoutes } = require("./routs/webhooksRoutes");
 
 // app.get('/api/v1/tours', getAllTours)
 // app.get('/api/v1/tours/:id', getTour)
@@ -69,6 +70,10 @@ const limiter = rateLimit({
   message: "Too many requests, please try again later.",
 });
 app.use("/api", limiter);
+
+//We put this rpouter here because the body is not gonna be as JSON
+//we have to parse it in a raw format
+app.use("/webhooks", webhooksRoutes);
 
 app.use(compression());
 
